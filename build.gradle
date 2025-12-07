@@ -1,0 +1,94 @@
+plugins {
+    id 'fabric-loom' version '1.10.5'
+    id 'maven-publish'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.21'
+}
+
+def getSequentialModVersion() {
+    def baseVersion = project.mod_version
+    def buildNumberFile = file("build_number.txt")
+    def currentBuildNumber = 0
+
+    if (buildNumberFile.exists()) {
+        try {
+            currentBuildNumber = buildNumberFile.text.trim() as int
+        } catch (Exception e) {
+            logger.warn("Could not read build_number.txt. Starting from 0. Error: ${e.message}")
+            currentBuildNumber = 0
+        }
+    } else {
+        logger.lifecycle("build_number.txt not found. Creating it with build number 0.")
+        buildNumberFile.write("0")
+    }
+
+    currentBuildNumber++
+
+    buildNumberFile.write(currentBuildNumber.toString())
+
+    return "${baseVersion}-${currentBuildNumber}"
+}
+
+version = getSequentialModVersion()
+
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://maven.fabricmc.net/" }
+    maven { url "https://libraries.minecraft.net/" }
+
+    maven { url "https://maven.shedaniel.me" }
+
+    maven {
+        name "Cobblemon"
+        url "https://maven.impactdev.net/repository/development/"
+    }
+}
+
+dependencies {
+
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation "com.cobblemon:fabric:1.7.1+1.21.1"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.21"
+    modImplementation "net.fabricmc:fabric-language-kotlin:1.13.3+kotlin.2.1.21"
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:16.0.799"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:16.0.799"
+}
+
+processResources {
+
+    inputs.property "baseVersion", project.mod_version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": inputs.properties.baseVersion
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+java {
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+fabricApi {
+    configureDataGeneration()
+}
+
+jar {
+    inputs.property "archivesName", project.base.archivesName
+
+    from("LICENSE")
+    from("ATTRIBUTION.md")
+}
