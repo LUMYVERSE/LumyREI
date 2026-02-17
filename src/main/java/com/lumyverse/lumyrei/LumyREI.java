@@ -5,69 +5,121 @@ import com.cobblemon.mod.common.client.gui.cookingpot.CookingPotScreen;
 import com.cobblemon.mod.common.item.crafting.CookingPotRecipe;
 import com.cobblemon.mod.common.item.crafting.CookingPotShapelessRecipe;
 import com.cobblemon.mod.common.item.crafting.brewingstand.BrewingStandRecipe;
-
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class LumyREI implements REIClientPlugin {
+
+    private static Field xField;
 
     @Override
     public void registerCategories(CategoryRegistry registry) {
+        registry.add(new CookingPotCategory());
+        registry.addWorkstations(CookingPotCategory.COOKING_POT, EntryStacks.of(Registries.ITEM.get(Identifier.of("cobblemon", "campfire_pot_red"))));
 
-        registry.add(new CookingPotCategory()); // Categoria Cooking Pot
+        registry.add(new BrewingStandCategory());
+        registry.addWorkstations(BrewingStandCategory.BREWING, EntryStacks.of(Items.BREWING_STAND));
 
-        registry.addWorkstations(
-                CookingPotCategory.COOKING_POT,
-                EntryStacks.of(Registries.ITEM.get(Identifier.of("cobblemon", "campfire_pot_red"))) // Icona Workstation
-        );
+        if (FabricLoader.getInstance().isModLoaded("rechiseled")) {
+            registry.add(new ChiselingCategory());
+            registry.addWorkstations(ChiselingCategory.ID, EntryStacks.of(Registries.ITEM.get(Identifier.of("rechiseled", "chisel"))));
+        }
 
-        registry.add(new BrewingStandCategory()); // Categoria Brewing Stand
-
-        registry.addWorkstations(
-                BrewingStandCategory.BREWING,
-                EntryStacks.of(Items.BREWING_STAND) // Icona Workstation
-        );
+        registry.add(new StarkForgeCategory());
+        registry.addWorkstations(StarkForgeCategory.ID, EntryStacks.of(Registries.ITEM.get(Identifier.of("lumymon", "stark_forge"))));
     }
 
     @Override
     public void registerDisplays(DisplayRegistry registry) {
 
-        // Cooking Pot (Shapeless)
-        registry.registerRecipeFiller(
-                CookingPotShapelessRecipe.class,
-                CobblemonRecipeTypes.INSTANCE.getCOOKING_POT_SHAPELESS(),
-                CookingPotDisplay::new
-        );
+        registry.registerRecipeFiller(CookingPotShapelessRecipe.class, CobblemonRecipeTypes.INSTANCE.getCOOKING_POT_SHAPELESS(), CookingPotDisplay::new);
+        registry.registerRecipeFiller(CookingPotRecipe.class, CobblemonRecipeTypes.INSTANCE.getCOOKING_POT_COOKING(), CookingPotDisplay::new);
+        registry.registerRecipeFiller(BrewingStandRecipe.class, CobblemonRecipeTypes.INSTANCE.getBREWING_STAND(), BrewingStandDisplay::new);
 
-        // Cooking Pot (Shaped)
-        registry.registerRecipeFiller(
-                CookingPotRecipe.class,
-                CobblemonRecipeTypes.INSTANCE.getCOOKING_POT_COOKING(),
-                CookingPotDisplay::new
-        );
+        if (FabricLoader.getInstance().isModLoaded("rechiseled") && MinecraftClient.getInstance().world != null) {
+            try {
+                Class<?> recipesClass = Class.forName("com.supermartijn642.rechiseled.chiseling.ChiselingRecipes");
+                var getAllRecipesMethod = recipesClass.getMethod("getAllRecipes");
+                java.util.Collection<?> recipes = (java.util.Collection<?>) getAllRecipesMethod.invoke(null);
 
-        // Brewing Stand
-        registry.registerRecipeFiller(
-                BrewingStandRecipe.class,
-                CobblemonRecipeTypes.INSTANCE.getBREWING_STAND(),
-                BrewingStandDisplay::new
-        );
+                for (Object recipe : recipes) {
+                    List<ItemStack> recipeItems = new ArrayList<>();
+                    var getEntriesMethod = recipe.getClass().getMethod("getEntries");
+                    java.util.List<?> entries = (java.util.List<?>) getEntriesMethod.invoke(recipe);
+
+                    for (Object entry : entries) {
+                        var getRegularItem = entry.getClass().getMethod("getRegularItem");
+                        net.minecraft.item.Item regItem = (net.minecraft.item.Item) getRegularItem.invoke(entry);
+                        if (regItem != null && regItem != Items.AIR) recipeItems.add(new ItemStack(regItem));
+                    }
+
+                    if (!recipeItems.isEmpty()) {
+                        registry.add(new ChiselingDisplay(recipeItems));
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        try {
+            Identifier starkRecipeTypeId = Identifier.of("lumymon", "stark_forging");
+            registry.registerFiller(net.minecraft.recipe.RecipeEntry.class,
+                    entry -> {
+                        if (entry == null || entry.value() == null) return false;
+                        return entry.value().getType().toString().contains("stark_forging");
+                    },
+                    recipeEntry -> {
+                        try {
+                            Object recipe = recipeEntry.value();
+                            net.minecraft.recipe.Ingredient input = (net.minecraft.recipe.Ingredient) recipe.getClass().getMethod("getInput").invoke(recipe);
+                            ItemStack output = (ItemStack) recipe.getClass().getMethod("getOutput").invoke(recipe);
+                            int cookTime = (int) recipe.getClass().getMethod("getCookTime").invoke(recipe);
+
+                            return new StarkForgeDisplay(
+                                    Collections.singletonList(me.shedaniel.rei.api.common.util.EntryIngredients.ofIngredient(input)),
+                                    Collections.singletonList(me.shedaniel.rei.api.common.util.EntryIngredients.of(output)),
+                                    cookTime
+                            );
+                        } catch (Exception e) { return null; }
+                    }
+            );
+        } catch (Exception ignored) {}
     }
 
     @Override
     public void registerScreens(ScreenRegistry registry) {
-        registry.registerClickArea(screen -> new Rectangle(
-                (screen.width - 176) / 2 + 78,
-                ((screen.height - 166) / 2) + 38,
-                20,
-                25
-        ), CookingPotScreen.class, CookingPotCategory.COOKING_POT);
+        registry.registerClickArea(screen -> {
+            int guiLeft = getGuiLeft(screen);
+            int centerY = screen.height / 2;
+            return new Rectangle(guiLeft + 96, centerY - 44, 21, 12);
+        }, CookingPotScreen.class, CookingPotCategory.COOKING_POT);
+    }
+
+    private int getGuiLeft(Screen screen) {
+        if (!(screen instanceof HandledScreen)) return 0;
+        try {
+            if (xField == null) {
+                try { xField = HandledScreen.class.getDeclaredField("x"); }
+                catch (NoSuchFieldException e) { xField = HandledScreen.class.getDeclaredField("field_2776"); }
+                xField.setAccessible(true);
+            }
+            return xField.getInt(screen);
+        } catch (Exception e) { return (screen.width - 146) / 2; }
     }
 }

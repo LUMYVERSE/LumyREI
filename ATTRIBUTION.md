@@ -1,35 +1,42 @@
 # Attributions and Acknowledgements for LumyREI
 
-LumyREI is a project released under the **GPL-3.0** license. 
-This project integrates and depends on the work of other authors and projects. 
+This project integrates with and depends on the work of various authors and developers.
 In compliance with their respective licenses, we provide the required acknowledgements here.
 
 ---
 
-## 1. Software Dependencies
+## 1. Software Dependencies & Integrations
 
-The LumyREI code integrates with the following software projects, which are included as runtime dependencies (mods).
+LumyREI interacts with the following software projects:
 
 ### Cobblemon
-* **Name:** Cobblemon
-* **Authors:** The Cobblemon Team
-* **License:** Mozilla Public License 2.0 (MPL 2.0)
-* **Source:** More information about Cobblemon and the full text of the license are available on their official repository.
+* **Author:** The Cobblemon Team
+* **License:** MPL 2.0
+* **Integration Details:** LumyREI provides enhanced recipe support and GUI integration for Cobblemon gameplay elements.
 
 ### Roughly Enough Items (REI)
-* **Name:** Roughly Enough Items (REI)
-* **Authors:** Shedaniel (and contributors)
+* **Author:** Shedaniel (and contributors)
 * **License:** MIT
-* **Copyright:** Copyright (c) 2018, 2019, 2020, 2021, 2022, 2023 shedaniel
+* **Integration Details:** LumyREI acts as a plugin for the REI API to register custom displays and categories.
+
+### Rechiseled
+* **Author:** SuperMartijn642
+* **License:** ARR
+* **Integration Details:** LumyREI provides optional integration with Rechiseled's recipes via reflection to display them within the REI interface. This integration does not distribute or modify any part of the original mod's binaries.
 
 ---
 
-## 2. Modified Assets
+## 2. Asset Attributions
 
-LumyREI uses and modifies 4 textures sourced from the Cobblemon Interface project (a Cobblemon add-on).
+LumyREI utilizes modified graphical assets sourced from the following third-party projects:
 
 ### Cobblemon Interface
-
-* **Original Project Name:** Cobblemon Interface
+* **Author:** VinnyStalck
 * **License:** MIT
-* **Copyright:** Copyright (c) 2023 VinnyStalck
+* **Integration Details:** This project includes 4 texture assets which have been modified to fit the specific UI requirements of LumyREI.
+
+---
+
+## 3. License Information
+
+The source code for LumyREI is licensed under the **GPL-3.0**. You may find the full text of the license in the LICENSE file included with this distribution.
