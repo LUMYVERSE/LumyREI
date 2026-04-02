@@ -51,14 +51,13 @@ public class CookingPotCategory implements DisplayCategory<CookingPotDisplay> {
     private static final int ARROW_DRAW_WIDTH = 22;
     private static final int ARROW_DRAW_HEIGHT = 12;
 
-    // Offset UV (se la freccia non parte da 0,0 nel suo PNG)
     private static final int ARROW_UV_U = 0;
     private static final int ARROW_UV_V = 0;
 
     private static final int OUTPUT_SLOT_POS_X = 111;
     private static final int OUTPUT_SLOT_POS_Y = 38;
 
-    // Durata dell'animazione in ticks. 100 ticks = 5 secondi
+    // Durata dell'animazione in ticks (100 ticks = 5 secondi)
     private static final int ANIMATION_DURATION_TICKS = 100;
 
     @Override
@@ -95,7 +94,6 @@ public class CookingPotCategory implements DisplayCategory<CookingPotDisplay> {
 
         widgets.add(Widgets.createTooltip(bounds));
 
-        // Disegna la texture di Sfondo
         widgets.add(Widgets.createTexturedWidget(
                 GUI_BACKGROUND_TEXTURE,
                 textureStartPoint.x, textureStartPoint.y,
@@ -135,7 +133,7 @@ public class CookingPotCategory implements DisplayCategory<CookingPotDisplay> {
             }
         }
 
-        // Freccia di Progresso
+        // Freccia del Progresso
         widgets.add(createCustomArrowWidget(textureStartPoint));
 
         // Output Slot
@@ -155,7 +153,7 @@ public class CookingPotCategory implements DisplayCategory<CookingPotDisplay> {
         int x = textureStartPoint.x + ARROW_POS_X;
         int y = textureStartPoint.y + ARROW_POS_Y;
 
-        // La logica di rendering e animazione
+        // Logica di rendering e animazione
         DrawableConsumer drawable = (DrawContext drawContext, int mouseX, int mouseY, float delta) -> {
 
             // Calcola il progresso di riempimento da 0.0 a 1.0 (ciclico)

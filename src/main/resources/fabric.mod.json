@@ -3,7 +3,7 @@
 	"id": "lumyrei",
 	"version": "${version}",
 	"name": "LumyREI",
-	"description": "REI integration for Cobblemon (Cooking Pot & Brewing Stand) and Rechiseled recipes.",
+	"description": "REI integration for Cobblemon (Cooking Pot & Brewing Stand) and Stark Forge recipes.",
 	"authors": [
 		"LUMYVERSE"
 	],

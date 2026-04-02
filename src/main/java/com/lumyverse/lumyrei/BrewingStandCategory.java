@@ -111,26 +111,25 @@ public class BrewingStandCategory implements DisplayCategory<BrewingStandDisplay
         Point startPoint = new Point(bounds.getCenterX() - WIDTH / 2, bounds.getCenterY() - HEIGHT / 2);
         List<Widget> widgets = new ArrayList<>();
 
-        // 0. Aggiunge lo sfondo base della ricetta
         widgets.add(Widgets.createRecipeBase(bounds));
 
-        // 1. Disegna Sfondo (ritaglio dalla texture 256x256)
+        // Disegna Sfondo
         widgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) ->
                 graphics.drawTexture(BACKGROUND_TEXTURE, startPoint.x, startPoint.y, 14, 13, WIDTH, HEIGHT, 256, 256)));
 
-        // 2. Slot Ingrediente Principale
+        // Slot Ingrediente Principale
         widgets.add(Widgets.createSlot(new Point(startPoint.x + INPUT_INGREDIENT_X, startPoint.y + INPUT_Y))
                 .entries(display.getInputEntries().get(0))
                 .markInput()
         );
 
-        // 3. Slot Combustibile (Blaze Powder)
+        // Slot Combustibile (Blaze Powder)
         widgets.add(Widgets.createSlot(new Point(startPoint.x + INPUT_BLAZE_X, startPoint.y + INPUT_Y))
                 .entries(display.getInputEntries().get(1))
                 .markInput()
         );
 
-        // 4. I 3 Slot per le Pozioni
+        // Slot Pozioni
         for (int i = 0; i < 3; i++) {
             Point bottlePos = new Point(startPoint.x + BOTTLE_X_OFFSETS[i], startPoint.y + BOTTLE_Y_OFFSETS[i]);
 
@@ -140,16 +139,16 @@ public class BrewingStandCategory implements DisplayCategory<BrewingStandDisplay
             );
         }
 
-        // 5. Animazione Freccia e Bolle
+        // Animazione Freccia e Bolle
         widgets.add(createBrewingAnimation(startPoint));
 
-        // 6. Slot Output
+        // Slot Output
         widgets.add(Widgets.createSlot(new Point(startPoint.x + OUTPUT_SLOT_X, startPoint.y + OUTPUT_SLOT_Y))
                 .entries(display.getOutputEntries().getFirst())
                 .markOutput()
         );
 
-        // 7. Quantità Output
+        // Quantità Output
         widgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 
@@ -161,7 +160,7 @@ public class BrewingStandCategory implements DisplayCategory<BrewingStandDisplay
             int width = textRenderer.getWidth(text);
 
             graphics.getMatrices().push();
-            graphics.getMatrices().translate(0.0F, 0.0F, 200.0F); // Sposta il testo in avanti sul piano Z per essere sopra l'oggetto
+            graphics.getMatrices().translate(0.0F, 0.0F, 200.0F);
             graphics.drawTextWithShadow(textRenderer, text, x - width, y, 0xFFFFFF);
             graphics.getMatrices().pop();
         }));
@@ -209,7 +208,7 @@ public class BrewingStandCategory implements DisplayCategory<BrewingStandDisplay
 
                 int filledWidth = (int) Math.round(ARROW_OUTPUT_WIDTH * horizontalProgress);
 
-                if (filledWidth > 0) { // Disegna solo se c'è un progresso da mostrare
+                if (filledWidth > 0) {
                     graphics.drawTexture(
                             PROGRESS_ARROW_TEXTURE,
                             arrowX, arrowY,

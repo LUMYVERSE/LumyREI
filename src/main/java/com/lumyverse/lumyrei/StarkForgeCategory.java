@@ -43,21 +43,21 @@ public class StarkForgeCategory implements DisplayCategory<StarkForgeDisplay> {
 
         widgets.add(Widgets.createRecipeBase(bounds));
 
-        // 1. Slot Input
+        // Slot Input
         widgets.add(Widgets.createSlot(new Point(startPoint.x, startPoint.y - 11))
                 .entries(display.getInputEntries().getFirst())
                 .markInput());
 
-        // 2. Slot Carburante (Lava)
+        // Slot Carburante (Lava)
         widgets.add(Widgets.createSlot(new Point(startPoint.x, startPoint.y + 11))
                 .entries(EntryIngredients.of(Items.LAVA_BUCKET))
                 .markInput());
 
-        // 3. Freccia
+        // Freccia del Progresso
         widgets.add(Widgets.createArrow(new Point(startPoint.x + 27, startPoint.y))
                 .animationDurationTicks(display.getCookTime()));
 
-        // 4. Slot Output
+        // Slot Output
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y))
                 .entries(display.getOutputEntries().getFirst())
                 .markOutput());

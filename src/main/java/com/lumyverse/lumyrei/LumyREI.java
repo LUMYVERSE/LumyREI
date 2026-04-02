@@ -11,8 +11,6 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
@@ -21,9 +19,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 public class LumyREI implements REIClientPlugin {
 
@@ -37,11 +33,6 @@ public class LumyREI implements REIClientPlugin {
         registry.add(new BrewingStandCategory());
         registry.addWorkstations(BrewingStandCategory.BREWING, EntryStacks.of(Items.BREWING_STAND));
 
-        if (FabricLoader.getInstance().isModLoaded("rechiseled")) {
-            registry.add(new ChiselingCategory());
-            registry.addWorkstations(ChiselingCategory.ID, EntryStacks.of(Registries.ITEM.get(Identifier.of("rechiseled", "chisel"))));
-        }
-
         registry.add(new StarkForgeCategory());
         registry.addWorkstations(StarkForgeCategory.ID, EntryStacks.of(Registries.ITEM.get(Identifier.of("lumymon", "stark_forge"))));
     }
@@ -52,30 +43,6 @@ public class LumyREI implements REIClientPlugin {
         registry.registerRecipeFiller(CookingPotShapelessRecipe.class, CobblemonRecipeTypes.INSTANCE.getCOOKING_POT_SHAPELESS(), CookingPotDisplay::new);
         registry.registerRecipeFiller(CookingPotRecipe.class, CobblemonRecipeTypes.INSTANCE.getCOOKING_POT_COOKING(), CookingPotDisplay::new);
         registry.registerRecipeFiller(BrewingStandRecipe.class, CobblemonRecipeTypes.INSTANCE.getBREWING_STAND(), BrewingStandDisplay::new);
-
-        if (FabricLoader.getInstance().isModLoaded("rechiseled") && MinecraftClient.getInstance().world != null) {
-            try {
-                Class<?> recipesClass = Class.forName("com.supermartijn642.rechiseled.chiseling.ChiselingRecipes");
-                var getAllRecipesMethod = recipesClass.getMethod("getAllRecipes");
-                java.util.Collection<?> recipes = (java.util.Collection<?>) getAllRecipesMethod.invoke(null);
-
-                for (Object recipe : recipes) {
-                    List<ItemStack> recipeItems = new ArrayList<>();
-                    var getEntriesMethod = recipe.getClass().getMethod("getEntries");
-                    java.util.List<?> entries = (java.util.List<?>) getEntriesMethod.invoke(recipe);
-
-                    for (Object entry : entries) {
-                        var getRegularItem = entry.getClass().getMethod("getRegularItem");
-                        net.minecraft.item.Item regItem = (net.minecraft.item.Item) getRegularItem.invoke(entry);
-                        if (regItem != null && regItem != Items.AIR) recipeItems.add(new ItemStack(regItem));
-                    }
-
-                    if (!recipeItems.isEmpty()) {
-                        registry.add(new ChiselingDisplay(recipeItems));
-                    }
-                }
-            } catch (Exception ignored) {}
-        }
 
         try {
             Identifier starkRecipeTypeId = Identifier.of("lumymon", "stark_forging");
